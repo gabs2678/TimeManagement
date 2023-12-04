@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase/supabase.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:orbit/ui/theme.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
@@ -8,6 +10,13 @@ class LoginPage extends StatelessWidget {
   final SupabaseClient supabase;
 
   LoginPage({required this.supabase});
+
+// Function to save user ID in local storage after logging in
+Future<void> saveUserIdToLocalStorage(String userId) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString('userId', userId);
+  print('User ID saved to local storage: $userId');
+}
 
   Future<void> loginUser(BuildContext context) async {
     final email = emailController.text.trim();
@@ -21,6 +30,9 @@ class LoginPage extends StatelessWidget {
         print('Error signing in: ${response.error!.message}');
         return;
       }
+      var user = supabase.auth.user();
+
+      saveUserIdToLocalStorage(user!.id);
 
       // User login successful
       // Redirect to home page or perform further actions
@@ -36,6 +48,7 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.red,
         title: Text('Login'),
       ),
       body: Padding(
@@ -60,7 +73,10 @@ class LoginPage extends StatelessWidget {
               ),
             ),
             SizedBox(height: 24.0),
-            ElevatedButton(
+             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                primary:primaryClr.withOpacity(1), // Set the button background color to red
+              ),
               onPressed: () {
                 loginUser(context); // Call function to log in user
               },

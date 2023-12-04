@@ -24,9 +24,9 @@ class Task {
     id = json['id'];
     title = json['title'];
     note = json['note'];
-    isCompleted = json['isCompleted'];
-    startDate = json['startDate'];
-    endDate = json['endDate'];
+    isCompleted = json['iscompleted'];
+    startDate = json['startdate'];
+    endDate = json['enddate'];
     color = json['color'];
   }
 

@@ -20,6 +20,8 @@ import 'package:intl/intl.dart';
 import 'package:orbit/ui/widgets/task_tile.dart';
 import 'package:supabase/supabase.dart'; // Import the Supabase package
 import '../../services/theme_services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class HomePage extends StatefulWidget {
   final SupabaseClient supabase; // Define the SupabaseClient instance as a parameter
@@ -30,6 +32,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   DateTime _selectedDate = DateTime.parse(DateTime.now().toString());
+
+
   final _taskController = Get.put(TaskController());
   var notifyHelper;
   bool animate = false;
@@ -70,6 +74,14 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+  void _logout() async {
+  // Perform logout action using the provided Supabase instance
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.remove('userId');
+  await widget.supabase.auth.signOut();
+  // Navigate to the login page after logout
+  Get.offAndToNamed('/');
+}
 
   _dateBar() {
     return Container(
@@ -117,6 +129,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+  
 
   _addTaskBar(BuildContext context) {
     return Container(
@@ -149,12 +162,13 @@ class _HomePageState extends State<HomePage> {
                 CupertinoPageRoute(
                   builder: (context) => AddTaskPage(supabase: widget.supabase),
                 ),
-              ).then((value) => setState(() {
-                    _taskController.getTasks();
-                  }));
+              );
+            _taskController.getTasks(); // Refresh tasks here
 
-              _taskController.getTasks();
-            },
+
+setState(() {
+      _taskController.getTasks(); // Refresh tasks here
+    });            },
           ),
         ],
       ),
@@ -174,22 +188,33 @@ class _HomePageState extends State<HomePage> {
               color: Get.isDarkMode ? Colors.white : darkGreyClr),
         ),
         actions: [
-          Icon(
-              Get.isDarkMode
-                  ? FlutterIcons.user_circle_faw
-                  : FlutterIcons.user_circle_o_faw,
-              color: Get.isDarkMode ? Colors.white : darkGreyClr),
-          const SizedBox(
-            width: 20,
-          ),
-        ]);
+      TextButton(
+      onPressed: () {
+        _logout(); // Call the logout function when the button is pressed
+      },
+      child: Text(
+        'Logout', // Display 'Logout' text
+        style: TextStyle(
+          color: Colors.black, // Text color
+          fontWeight: FontWeight.bold, // Text weight
+        ),
+      ),
+      ),
+      const SizedBox(
+        width: 20,
+      ),
+    ]);
   }
 
   _showTasks() {
     return Expanded(
       child: Obx(() {
         bool isEmpty = true;
-        for (var task in _taskController.taskList) {
+         if (_taskController.taskList.isEmpty) {
+    return Text('No tasks available');
+  }
+        var task_list = _taskController.taskList;
+        for (var task in task_list) {
           DateTime startDate = DateTime.parse(task.startDate);
           DateTime endDate = DateTime.parse(task.endDate);
 
@@ -203,7 +228,7 @@ class _HomePageState extends State<HomePage> {
           }
         }
         if (isEmpty) return _noTaskMsg();
-
+ 
         return ListView.builder(
             scrollDirection: Axis.vertical,
             itemCount: _taskController.taskList.length,

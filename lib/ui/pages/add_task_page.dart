@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:orbit/ui/pages/home_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:supabase/supabase.dart'; // Import the Supabase package
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddTaskPage extends StatefulWidget {
   final SupabaseClient supabase; // Define the SupabaseClient instance as a parameter
@@ -211,8 +212,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
   _addTaskToDB() async {
     DateTime startDate = DateFormat('MM/dd/yyyy hh:mm a').parse('${DateFormat.yMd().format(_startDate)} $_startTime');
     DateTime endDate = DateFormat('MM/dd/yyyy hh:mm a').parse('${DateFormat.yMd().format(_endDate)} $_endTime');
-      var user = widget.supabase.auth.user();
-      print(user);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userId = prefs.getString('userId');
       final taskData = {
       'title': _titleController.text,
       'note': _noteController.text,
@@ -220,7 +221,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
       'enddate': endDate.toIso8601String(),
       'color': _selectedColor,
       'iscompleted': 0,
-      'user_id': user?.id
+    'user_id': userId
     };
 
     // Insert the task data into Supabase tasks table
@@ -231,7 +232,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
       print('Error adding task to Supabase: ${response.error!.message}');
       return;
     }
-
+  _taskController.getTasks();
     // Task added to Supabase successfully
     print('Task added to Supabase successfully');
   }

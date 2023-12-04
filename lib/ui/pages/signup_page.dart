@@ -35,7 +35,7 @@ class SignUpPage extends StatelessWidget {
 
       // User registration successful
       // Redirect to home page or perform further actions
-      Get.offNamed('/home');
+      Get.offNamed('/');
     } catch (error) {
       // Exception occurred during registration
       // Handle exception - Show error message or snackbar to inform the user
@@ -46,6 +46,7 @@ class SignUpPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: context.theme.backgroundColor,
       appBar: AppBar(
         title: Text('Sign Up'),
       ),

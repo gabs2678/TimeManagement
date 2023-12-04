@@ -49,6 +49,7 @@ dependencies:
   sqflite: 
   rxdart:
   flutter_launcher_icons:
+  shared_preferences: ^2.0.15
 flutter_icons:
     android: "launcher_icon"
     ios: true
