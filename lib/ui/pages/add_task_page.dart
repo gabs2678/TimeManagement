@@ -10,8 +10,11 @@ import 'package:orbit/ui/widgets/input_field.dart';
 import 'package:intl/intl.dart';
 import 'package:orbit/ui/pages/home_page.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:supabase/supabase.dart'; // Import the Supabase package
 
 class AddTaskPage extends StatefulWidget {
+  final SupabaseClient supabase; // Define the SupabaseClient instance as a parameter
+  AddTaskPage({required this.supabase}); // Constructor to receive SupabaseClient instance
   @override
   _AddTaskPageState createState() => _AddTaskPageState();
 }
@@ -208,16 +211,29 @@ class _AddTaskPageState extends State<AddTaskPage> {
   _addTaskToDB() async {
     DateTime startDate = DateFormat('MM/dd/yyyy hh:mm a').parse('${DateFormat.yMd().format(_startDate)} $_startTime');
     DateTime endDate = DateFormat('MM/dd/yyyy hh:mm a').parse('${DateFormat.yMd().format(_endDate)} $_endTime');
-    await _taskController.addTask(
-      task: Task(
-        note: _noteController.text,
-        title: _titleController.text,
-        startDate: startDate.toString(),
-        endDate: endDate.toString(),
-        color: _selectedColor,
-        isCompleted: 0,
-      ),
-    );
+      var user = widget.supabase.auth.user();
+      print(user);
+      final taskData = {
+      'title': _titleController.text,
+      'note': _noteController.text,
+      'startdate': startDate.toIso8601String(),
+      'enddate': endDate.toIso8601String(),
+      'color': _selectedColor,
+      'iscompleted': 0,
+      'user_id': user?.id
+    };
+
+    // Insert the task data into Supabase tasks table
+    final response = await widget.supabase.from('tasks').insert(taskData).execute();
+    
+    if (response.error != null) {
+      // Handle error if insertion fails
+      print('Error adding task to Supabase: ${response.error!.message}');
+      return;
+    }
+
+    // Task added to Supabase successfully
+    print('Task added to Supabase successfully');
   }
 
   _colorChips() {

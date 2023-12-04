@@ -18,10 +18,12 @@ import 'package:orbit/ui/theme.dart';
 import 'package:orbit/ui/widgets/button.dart';
 import 'package:intl/intl.dart';
 import 'package:orbit/ui/widgets/task_tile.dart';
-
+import 'package:supabase/supabase.dart'; // Import the Supabase package
 import '../../services/theme_services.dart';
 
 class HomePage extends StatefulWidget {
+  final SupabaseClient supabase; // Define the SupabaseClient instance as a parameter
+  HomePage({required this.supabase}); // Constructor to receive SupabaseClient instance
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -145,7 +147,7 @@ class _HomePageState extends State<HomePage> {
               Navigator.push(
                 context,
                 CupertinoPageRoute(
-                  builder: (context) => AddTaskPage(),
+                  builder: (context) => AddTaskPage(supabase: widget.supabase),
                 ),
               ).then((value) => setState(() {
                     _taskController.getTasks();
